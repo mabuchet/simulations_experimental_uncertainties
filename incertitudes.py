@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from pylab import *
 import random
 import bibliotheque as bib
+
 close('all')
 
 """
@@ -71,7 +73,7 @@ for i in range(1,n+1):
         
         pause(0.1) # pour laisser le temps aux graphs de se construire
         if i==10 : raw_input('Pause') # pour pouvoir donner explications
-    
+
 raw_input('On passe à la suite ?')
 ################################################################################
 # 2 - Distribution de la moyenne
@@ -109,10 +111,6 @@ histo_mesure_subplot = fig.add_subplot(2,2,1)
 histo_moyenne_subplot = fig.add_subplot(2,2,2)
 histo_mesures_subplot = fig.add_subplot(2,2,3)
 histo_moyenne_zoom_subplot = fig.add_subplot(2,2,4)
-# histo_mesure_subplot = fig.add_subplot(2,2,1)
-# histo_mesures_subplot = fig.add_subplot(2,2,2)
-# histo_moyenne_subplot = fig.add_subplot(2,2,3)
-# histo_moyenne_zoom_subplot = fig.add_subplot(2,2,4)
 
 suite=bib.suite_constructeur(N)
 for i in range(1,N+1) :
@@ -133,17 +131,17 @@ for i in range(1,N+1) :
         titre = 'Histogramme des mesures cumulees\nnombre de mesures = {}'
         titre=titre.format(i*n)
         bib.subplot_histo(histo_mesures_subplot,limits,titre,x_mesures,h_mesures,
-                      dx_mesures)
+                    dx_mesures)
         
         limits=[x_min_mesures,x_max_mesures]
         titre = 'Histogramme des moyennes\nnombre de moyennes = {}'.format(i)
         bib.subplot_histo(histo_moyenne_subplot,limits,titre,x_moyenne,h_moyenne,
-                      dx_moyenne)
+                    dx_moyenne)
         limits=[x_min_moyenne,x_max_moyenne]
         titre = 'Histogramme des moyennes - Zoom\nnombre de moyennes = {}'
         titre=titre.format(i)
         bib.subplot_histo(histo_moyenne_zoom_subplot,limits,titre,x_moyenne,
-                      h_moyenne,dx_moyenne)
+                    h_moyenne,dx_moyenne)
         
         pause(0.1) # pour laisser le temps aux graphs de se construire
         if i==10 : raw_input('Pause') # pour pouvoir donner explications
@@ -182,6 +180,7 @@ les valeurs de a et b et des incertitudes sur les points de mesure
 """
 a=3.
 b=1.
+print 'On a choisi : a = {} et b = {}'.format(a,b)
 n=10
 N=100000 # nombre "d'opérations de mesures" 
 
@@ -191,33 +190,31 @@ def f(x,a,b):
 x_min=0.
 x_max=10.
 x=linspace(x_min,x_max,n)
-dx=[.1,.3,.5,.2,.5,.1,.1,.4,.2,.3]
+dy=[.1,.3,.5,.2,.5,.1,.1,.4,.2,.3]
 y=[]
 a_estime=[]
 b_estime=[]
 da=[]
 db=[]
 chisq_red=[]
-
-#def histogramme(x,figname,n_series):
-#    """ Trace l'histogramme de x avec sqrt(n_series) échantillons ou 10 si ce
-#    ce nombre est plus petit que 10."""
-#    bins=max(int(sqrt(n_series)),10)
-#    x_hist=histogram(x,bins=bins)
-#    figure(figname)
-#    plot(x_hist[1][:-1],x_hist[0])
-#    return x_hist
-
+fig_mesures=figure(u'Quelques opérations de mesures et ajustements')
+ax_mesures=fig_mesures.add_subplot(1,1,1)
 for i in range(N) :
-    y.append([random.gauss(f(val,a,b),s) for val,s in zip(x,dx)])
-    aa,daa,bb,dbb,chisqchisq,chisq_redchisq_red=bib.reg_lin(x,y[i],dx)
-    
+    y.append([random.gauss(f(val,a,b),s) for val,s in zip(x,dy)])
+    aa,daa,bb,dbb,chisqchisq,chisq_redchisq_red=bib.reg_lin(x,y[i],dy)
     a_estime.append(aa)
     b_estime.append(bb)
     da.append(daa)
     db.append(dbb)
     chisq_red.append(chisq_redchisq_red)
-    if (i%(N/100))==0 : print float(i)/float(N)*100,'%'
+    if i in [0,1] :
+        ax_mesures.errorbar(x,y[i],dy,fmt='+')
+        pause(0.1) 
+        raw_input('Pause') # pour explications  
+        ax_mesures.plot([x_min,x_max],[f(x_min,aa,bb),f(x_max,aa,bb)])
+        pause(0.1) 
+        raw_input('Pause') # pour explications  
+    if (i%(N/100))==0 : print float(i)/float(N)*100,'%'   
 y=array(y)
 a_estime=array(a_estime)
 b_estime=array(b_estime)
@@ -230,13 +227,15 @@ fig_histo_mesures=figure('histogrammes pour chacun des points')
 ax_histo_mesures = fig_histo_mesures.add_subplot(1,1,1)
 for i in range(n):
     bib.histogramme(y[:,i],ax_histo_mesures,N,clear=False)
+pause(0.1) 
 raw_input('Pause') # pour explications
 
 # Histogramme des N valeurs de a obtenues :
 fig_a_estime=figure('histogramme des valeurs de a')
 ax_a_estime = fig_a_estime.add_subplot(1,1,1)
 bib.histogramme(a_estime,ax_a_estime,N)
-raw_input('Pause') # pour explications
+pause(0.1) 
+raw_input('Pause') # pour explications  
 
 # Histogramme des N valeurs de da obtenues : (inutile)
 #fig_da_estime=figure('histogramme des valeurs de da')
@@ -247,6 +246,7 @@ raw_input('Pause') # pour explications
 fig_b_estime=figure('histogramme des valeurs de b')
 ax_b_estime = fig_b_estime.add_subplot(1,1,1)
 bib.histogramme(b_estime,ax_b_estime,N)
+pause(0.1) 
 raw_input('Pause') # pour explications
 
 # Histogramme des N valeurs de db obtenues : (inutile)
@@ -258,7 +258,8 @@ raw_input('Pause') # pour explications
 fig_chi_sq_red=figure(u'histogramme des valeurs de chi carre réduit')
 ax_chis_sq_red = fig_chi_sq_red.add_subplot(1,1,1)
 bib.histogramme(chisq_red,ax_chis_sq_red,N)
-
+pause(0.1)
+                                            
 print 'ecart-type de a :',std(a_estime)
 print 'moyenne de da :',mean(da)
 print 'occurence au hasard de da :',random.choice(da)
