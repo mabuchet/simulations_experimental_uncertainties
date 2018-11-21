@@ -268,6 +268,7 @@ print 'ecart-type de b :',std(b_estime)
 print 'moyenne de db :',mean(db)
 print 'occurence au hasard de db :',random.choice(db)
 
+raw_input('Fin ?')
 ################################################################################
 # Conclusion : 
 ################################################################################
